@@ -1,0 +1,12 @@
+[domain]
+127.0.0.1:3000
+
+[accounts]
+r4EwBWxrx5HxYRyisfGzMto3AT8FZiYdWk
+
+[hotwallets]
+r4EwBWxrx5HxYRyisfGzMto3AT8FZiYdWk
+
+[federation_url]
+https://127.0.0.1:3000/ripple_federation
+
