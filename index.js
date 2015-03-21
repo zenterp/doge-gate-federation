@@ -41,7 +41,7 @@ app.get('/ripple_federation', (req, res) => {
         "federation_json" : {
           "type" : "federation_record",
           "destination" : dogecoinAddress,
-          "domain" : DOMAIN,
+          "domain" : domain,
           "destination_address" : 'r4EwBWxrx5HxYRyisfGzMto3AT8FZiYdWk',
           "destination_tag" : 12345,
           "currencies" : [
