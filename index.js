@@ -60,12 +60,20 @@ app.get('/ripple_federation', (req, res) => {
 
 app.use(express.static(__dirname+'/public'))
 
-const  httpsServer = https.createServer({
-  key: privateKey,
-  cert: certificate
-}, app);
+if (process.env.SSL) {
 
-httpsServer.listen(PORT, () => {
-  console.log("listening on port", PORT)
-})
+  const  httpsServer = https.createServer({
+    key: privateKey,
+    cert: certificate
+  }, app);
 
+  httpsServer.listen(PORT, () => {
+    console.log("listening on port", PORT)
+  })
+
+} else {
+
+  app.listen(PORT, () => {
+    console.log("listening on port", PORT)
+  })
+}
