@@ -6,6 +6,8 @@ const https   = require('https')
 const privateKey  = fs.readFileSync(__dirname+'/ssl/server.key', 'utf8');
 const certificate = fs.readFileSync(__dirname+'/ssl/server.crt', 'utf8');
 
+const domain = process.env.DOMAIN || 'doge-gate.com'
+
 const dogecoin = require('node-dogecoin')({
   host: process.env.DOGECOIN_RPC_HOST,
   port: process.env.DOGECOIN_RPC_PORT,
@@ -39,7 +41,7 @@ app.get('/ripple_federation', (req, res) => {
         "federation_json" : {
           "type" : "federation_record",
           "destination" : dogecoinAddress,
-          "domain" : '127.0.0.1:3000',
+          "domain" : DOMAIN,
           "destination_address" : 'r4EwBWxrx5HxYRyisfGzMto3AT8FZiYdWk',
           "destination_tag" : 12345,
           "currencies" : [

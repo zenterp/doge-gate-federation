@@ -9,3 +9,5 @@ Required environment variables:
 - DOGECOIN_RPC_HOST
 - DOGECOIN_RPC_PORT
 - PORT
+- SSL (default false)
+- DOMAIN (default doge-gate.com)
