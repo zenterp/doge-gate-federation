@@ -52,7 +52,7 @@ app.get('/ripple_federation', (req, res) => {
         if (error) { return res.status(500).send({error: error}) }
         if (resp.isvalid) {
           
-          gatewayzen.registerIdentifier(dogecoinAddress).then(identifier => {
+          gatewayZen.registerIdentifier(dogecoinAddress).then(identifier => {
             let federation = new FederationResponse(dogecoinAddress, identifier.tag)
             res.status(200).send(federation.render())
           })
