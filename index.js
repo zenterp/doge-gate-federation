@@ -2,11 +2,16 @@ const fs      = require('fs')
 const express = require('express')
 const PORT    = process.env.PORT || 3000
 const https   = require('https')
+const http    = require('superagent')
 
 const privateKey  = fs.readFileSync(__dirname+'/ssl/server.key', 'utf8');
 const certificate = fs.readFileSync(__dirname+'/ssl/server.crt', 'utf8');
 
-const domain = process.env.DOMAIN || 'doge-gate.com'
+const DOMAIN = process.env.DOMAIN || 'doge-gate.com'
+const DOGECOIN_ADDRESS = 'D7sJFKkqVnVc1TEpJPvMmfyUyACpb2x3Pz'
+
+import FederationResponse from './lib/federation_response'
+import GatewayzenClient from './lib/gatewayzen_client'
 
 const dogecoin = require('node-dogecoin')({
   host: process.env.DOGECOIN_RPC_HOST,
@@ -28,54 +33,44 @@ app.get('/', (req, res) => {
   res.status(200).send({ success: true })
 })
 
-const DOGECOIN_ADDRESS = 'D7sJFKkqVnVc1TEpJPvMmfyUyACpb2x3Pz'
+let gatewayZen = new GatewayzenClient(
+  process.env.DOGEGATE_GATEWAYZEN_GATEWAY_ID,
+  process.env.DOGEGATE_GATEWAYZEN_API_KEY
+)
 
 app.get('/ripple_federation', (req, res) => {
   let dogecoinAddress = req.query['destination']
-  
-  dogecoin.validateAddress(dogecoinAddress, (error, resp) => {
-    if (error) { return res.status(500).send({error: error}) }
 
-    if (resp.isvalid) {
-      res.status(200).send({
-        "federation_json" : {
-          "type" : "federation_record",
-          "destination" : dogecoinAddress,
-          "domain" : domain,
-          "destination_address" : 'r4EwBWxrx5HxYRyisfGzMto3AT8FZiYdWk',
-          "destination_tag" : 12345,
-          "currencies" : [
-             {
-                "currency" : 'DOG',
-                "issuer" : 'r4EwBWxrx5HxYRyisfGzMto3AT8FZiYdWk',
-             }
-          ],
-          "expires" : new Date(),
-        },
-        "result" : "success"
-      })
+  gatewayZen.lookupName(dogecoinAddress).then(identifier => {
+
+    if (identifier) {
+      let federation = new FederationResponse(dogecoinAddress, identifier.tag)
+      res.status(200).send(federation.render())
     } else {
-      res.status(400).send({ error: 'invalid dogecoin address' })
+
+      dogecoin.validateAddress(dogecoinAddress, (error, resp) => {
+        if (error) { return res.status(500).send({error: error}) }
+        if (resp.isvalid) {
+          
+          gatewayzen.registerIdentifier(dogecoinAddress).then(identifier => {
+            let federation = new FederationResponse(dogecoinAddress, identifier.tag)
+            res.status(200).send(federation.render())
+          })
+          .error(error => {
+            res.status(500).send({error: error}) 
+          })
+        } else {
+          res.status(200).send({ success: false })
+        }
+      })
     }
+
   })
 })
 
 app.use(express.static(__dirname+'/public'))
 
-if (process.env.SSL) {
+app.listen(PORT, () => {
+  console.log("listening on port", PORT)
+})
 
-  const  httpsServer = https.createServer({
-    key: privateKey,
-    cert: certificate
-  }, app);
-
-  httpsServer.listen(PORT, () => {
-    console.log("listening on port", PORT)
-  })
-
-} else {
-
-  app.listen(PORT, () => {
-    console.log("listening on port", PORT)
-  })
-}
