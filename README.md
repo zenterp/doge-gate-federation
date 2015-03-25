@@ -11,3 +11,6 @@ Required environment variables:
 - PORT
 - SSL (default false)
 - DOMAIN (default doge-gate.com)
+- DOGEGATE_GATEWAYZEN_GATEWAY_ID
+- DOGEGATE_GATEWAYZEN_API_KEY
+
